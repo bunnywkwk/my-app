@@ -86,12 +86,8 @@ pipeline {
                         git clone https://${GITHUB_USER}:${GITHUB_TOKEN}@${env.GITOPS_REPO_URL} my-app-gitops
                         cd my-app-gitops
                         
-                        # 2. Checkout target environment branch
-                        if [ "${env.IS_STAGING}" = "true" ]; then
-                            git checkout main || git checkout -b main
-                        elif [ "${env.IS_PROD}" = "true" ]; then
-                            git checkout prod || git checkout -b prod
-                        fi
+                        # 2. Checkout main branch
+                        git checkout main || git checkout -b main
                         
                         # 3. Update image tag in deployment manifest
                         sed -i "s|image: ${env.DOCKER_REPO}:.*|image: ${env.IMAGE}|g" ${env.TARGET_GITOPS_FOLDER}/deployment.yaml
@@ -101,12 +97,8 @@ pipeline {
                         git config user.name "Jenkins GitOps Engine"
                         git add .
                         git commit -m "ci(gitops): update ${env.APP_NAME} image to ${env.IMAGE_TAG} in ${env.TARGET_GITOPS_FOLDER}" || echo "No changes to commit"
-                        
-                        if [ "${env.IS_STAGING}" = "true" ]; then
-                            git push origin main
-                        elif [ "${env.IS_PROD}" = "true" ]; then
-                            git push origin prod
-                        fi
+                        git push origin main
+
                     """
                 }
             }
